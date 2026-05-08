@@ -41,7 +41,12 @@ def split_by_patient(data, features, test_size=0.2):
     return data, X, y, train_idx, test_idx
 
 
-def cross_validate_model(data, features, max_depth=8):
+def cross_validate_tree_depth(data, features, max_depth=10):
+    """
+    Test different Decision Tree depths using GroupKFold cross-validation.
+    The split is grouped by patient_id to avoid data leakage.
+    """
+
     data, X, y, train_idx, _ = split_by_patient(data, features)
 
     X_train = X[train_idx]
@@ -53,7 +58,10 @@ def cross_validate_model(data, features, max_depth=8):
     results = []
 
     for depth in range(1, max_depth + 1):
-        model = DecisionTreeClassifier(max_depth=depth, random_state=42)
+        model = DecisionTreeClassifier(
+            max_depth=depth,
+            random_state=42
+        )
 
         auc_scores = cross_val_score(
             model,
@@ -70,7 +78,18 @@ def cross_validate_model(data, features, max_depth=8):
             "std_auc": np.std(auc_scores)
         })
 
-    return pd.DataFrame(results)
+    results_df = pd.DataFrame(results)
+
+    best_row = results_df.loc[results_df["mean_auc"].idxmax()]
+    best_depth = int(best_row["max_depth"])
+
+    print("\nCross-validation results:")
+    print(results_df)
+
+    print(f"\nBest tree depth: {best_depth}")
+    print(f"Best mean AUC: {best_row['mean_auc']:.4f} ± {best_row['std_auc']:.4f}")
+
+    return best_depth, results_df
 
 
 def train_model(data, features, max_depth=4):
