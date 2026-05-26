@@ -24,8 +24,8 @@ print("TN:", tn)
 print("FN:", fn)
 
 results = pd.DataFrame({
-    "Metric": ["Accuracy", "Recall", "Precision"],
-    "Value": [accuracy, recall, precision]
+    "Metric": ["Accuracy", "Recall", "Precision", "TP", "FP", "TN", "FN"],
+    "Value": [accuracy, recall, precision, tp, fp, tn, fn]
 })
 
 results.to_csv("results/baseline_metrics_summary.csv",
