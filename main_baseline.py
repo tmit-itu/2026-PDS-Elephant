@@ -6,7 +6,7 @@ from src.classifier import (
     evaluate_model
 )
 
-data = pd.read_csv("results/features_baseline.csv")
+data = pd.read_csv("data/features_baseline.csv")
 
 features = get_features(data)
 
@@ -18,7 +18,9 @@ best_depth, cv_results = cross_validate_tree_depth(
 
 cv_results.to_csv("results/cross_validation_baseline.csv", index=False)
 
-model = train_model(data, features, max_depth=best_depth)
+model = train_model(data, features, max_depth=best_depth,
+                    model_path="results/models/tree_baseline.pkl")
+
 
 evaluate_model(
     data=data,
