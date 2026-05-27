@@ -4,7 +4,8 @@ data/imgs/*
 data/masks/*
 !data/masks/.gitkeep
 
-
+# macOS
+.DS_Store
 
 
 # Byte-compiled / optimized / DLL files

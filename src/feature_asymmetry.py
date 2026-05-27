@@ -117,7 +117,7 @@ def mean_asymmetry(mask, rotations = 4):
 
     Args:
         mask (numpy.ndarray): mask to compute asymmetry score for
-        rotations (int, optional): amount of rotations (default 30)
+        rotations (int, optional): amount of rotations (default 4)
 
     Returns:
         mean_score (float): mean asymmetry score.

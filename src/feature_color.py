@@ -10,8 +10,7 @@ def mean_hsv_in_mask(img, mask):
     pixels = hsv[mask > 0].astype(np.float32) / 255.0
 
     if len(pixels) > 0:
-        res = np.mean(pixels, axis=0)
-        return res if res.shape == (3,) else [res, res, res]
+        return np.mean(pixels, axis=0)
     
     return [0.0, 0.0, 0.0]
 
@@ -23,9 +22,8 @@ def std_hsv_in_mask(img, mask):
     pixels = hsv[mask > 0].astype(np.float32) / 255.0
 
     if len(pixels) > 0:
-        res = np.std(pixels, axis=0)
-        return res if res.shape == (3,) else [res, res, res] 
-    
+        return np.std(pixels, axis=0)
+        
     return [0.0, 0.0, 0.0]
 
 def color_entropy_from_pixels(img, mask):
