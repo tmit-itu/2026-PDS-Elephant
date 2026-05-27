@@ -7,7 +7,6 @@ from tqdm import tqdm
 from feature_asymmetry import mean_asymmetry
 from feature_compactness import get_compactness
 from feature_color import extract_color_features
-from feature_diameter import get_diameter
 from feature_texture import mean_gradient
 from preprocessing import enhance_color_hsv_clahe
 
@@ -32,7 +31,6 @@ def process_image(row):
         feature_a = mean_asymmetry(mask)
         feature_b = get_compactness(mask)
         feature_c = extract_color_features(img_preprocessed, mask)
-        feature_d = get_diameter(mask)
         feature_t = mean_gradient(img_preprocessed, mask)
         
         return {"img_id": row["img_id"],
