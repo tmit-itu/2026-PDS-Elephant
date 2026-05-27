@@ -16,7 +16,7 @@ output_path = "../results/features_baseline.csv"
 
 def process_image(row):
     try:
-        img_id = row["img_id"][:-4]
+        img_id = os.path.splitext(row["img_id"])[0] 
         img = cv2.imread(os.path.join(imgs_path, f"{img_id}.png"))
         mask = cv2.imread(os.path.join(masks_path, f"{img_id}_mask.png"), 0)
 
