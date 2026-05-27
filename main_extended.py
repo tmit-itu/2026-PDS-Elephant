@@ -15,7 +15,7 @@ from src.classifier import (
 )
 
 # Load data
-data = pd.read_csv("results/features_extended.csv")
+data = pd.read_csv("data/features_extended.csv")
 
 # Get feature columns
 features = get_features(data)
@@ -34,11 +34,9 @@ cv_results.to_csv(
 )
 
 # Train model
-model = train_model(
-    data=data,
-    features=features,
-    max_depth=best_depth
-)
+model = train_model(data, features, max_depth=best_depth,
+                    model_path="results/models/tree_extended.pkl")
+
 
 # Generate predictions CSV
 evaluate_model(
