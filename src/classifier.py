@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import joblib
 
 from sklearn.model_selection import train_test_split, GroupKFold, cross_val_score
 from sklearn.tree import DecisionTreeClassifier
@@ -92,14 +93,18 @@ def cross_validate_tree_depth(data, features, max_depth=10):
     return best_depth, results_df
 
 
-def train_model(data, features, max_depth=4):
+def train_model(data, features, max_depth=4, model_path=None):
     data, X, y, train_idx, _ = split_by_patient(data, features)
-
     X_train = X[train_idx]
     y_train = y[train_idx]
 
     model = DecisionTreeClassifier(max_depth=max_depth, random_state=42)
     model.fit(X_train, y_train)
+
+    if model_path is not None:
+        Path(model_path).parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(model, model_path)
+        print(f"Saved model to {model_path}")
 
     return model
 
