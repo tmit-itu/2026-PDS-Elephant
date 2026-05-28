@@ -36,7 +36,8 @@ masks in `data/masks/`.
 ├── results/
 │   ├── figures/                    # confusion matrices, cross-validation plots
 │   ├── models/                     # saved trained models (.pkl)
-│   └── predictions/                # model predictions (.csv)
+│   ├── predictions/                # model predictions (.csv)
+    └── reports/                    # main report, read latex reports  
 ├── src/
 │   ├── extract_features_baseline.py   # feature extraction, no hair removal
 │   ├── extract_features_extended.py   # feature extraction with hair removal
