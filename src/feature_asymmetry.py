@@ -2,57 +2,58 @@ import numpy as np
 from math import floor, ceil
 from skimage.transform import rotate
 
-
-'''Calculating asymmetry score by rotating image n times over 180 degrees,
-cropping after each rotation, and calculating asymmetry each time,
-with the final score taken as the average of all rotations.'''
-
 def cut_mask(mask):
-    '''Cut empty space from mask array such that it has smallest possible dimensions.
+    """
+    Crop mask to the smallest region containing the lesion.
 
-    Args:
-        mask (numpy.ndarray): mask to cut
+    Removes empty space around the lesion to ensure accurate symmetry
+    calculations.
+
+    Parameters:
+        mask (ndarray): binary mask
 
     Returns:
-        cut_mask_ (numpy.ndarray): cut mask
-    '''
+        ndarray: cropped mask
+    """
 
+    # Ensure mask is single-channel
     if len(mask.shape) == 3:
         mask = mask[:, :, 0]
 
     coords = np.argwhere(mask > 0)
-    
     if coords.size == 0:
         return mask
 
+    # Determine bounding box and crop
     mins = coords.min(axis = 0)
     maxs = coords.max(axis=0)
 
-    
     row_min, col_min = mins[0], mins[1]
     row_max, col_max = maxs[0], maxs[1]
 
-    cut_mask_ = mask[row_min:row_max+1, col_min:col_max+1]
+    return mask[row_min:row_max+1, col_min:col_max+1]
 
-    return cut_mask_
 
 def find_midpoint(image):
-    '''Find midpoint of image array.'''
-    row_mid = image.shape[0] / 2
-    col_mid = image.shape[1] / 2
-    return row_mid, col_mid
+    """
+    Compute the geometric midpoint of the image.
+    """
+    return image.shape[0] / 2, image.shape[1] / 2
+
 
 def asymmetry(mask):
-    ''' Calculate asymmetry score between 0 and 1 from vertical and horizontal axis
-        on a binary mask, 0 being complete symmetry, 1 being complete asymmetry,
-       i.e. no pixels overlapping when folding mask on x- and y-axis
+    """
+    Compute asymmetry score based on horizontal and vertical axes.
 
-       Args:
-        mask (numpy.ndarray): input mask
+    The mask is split into halves and compared using XOR to measure
+    pixel differences. The score ranges from 0 (symmetric) to 1 (asymmetric).
 
-       Returns:
-          asymmetry_score (float): Float between 0 and 1 indicating level of asymmetry.
-    '''
+    Parameters:
+        mask (ndarray): binary mask
+
+    Returns:
+        float: asymmetry score
+    """
 
     row_mid, col_mid = find_midpoint(mask)
 
@@ -80,24 +81,29 @@ def asymmetry(mask):
 
     return round(asymmetry_score, 4)
 
-def rotation_asymmetry(mask, n: int):
-    '''Rotate mask n times and calculate asymmetry score for each iteration.
-    Rotates n times between 0 and 180 degrees.
 
-    Args:
-        mask (numpy.ndarray): Input binary mask.
-        n (int): Number of rotations.
+def rotation_asymmetry(mask, n: int):
+    """
+    Compute asymmetry scores across multiple rotations.
+
+    The mask is rotated between 0° and 180°, and asymmetry is evaluated
+    for each orientation.
+
+    Parameters:
+        mask (ndarray): binary mask
+        n (int): number of rotations
 
     Returns:
-        dict: Asymmetry scores for each rotation angle.
-    '''
+        dict: mapping of rotation angle -> asymmetry score
+    """
+
     asymmetry_scores = {}
     mask = mask.astype(bool)
 
     for i in range(n):
-
         degrees = 180 * i / n
 
+        # Rotate mask, threshold to binary, and crop
         rotated_mask = rotated_mask = rotate(
             mask.astype(float),
             degrees,
@@ -105,24 +111,28 @@ def rotation_asymmetry(mask, n: int):
             order=0,
             preserve_range=True
         ) > 0.5
+
         cutted_mask = cut_mask(rotated_mask)
 
         asymmetry_scores[degrees] = asymmetry(cutted_mask)
 
     return asymmetry_scores
 
-def mean_asymmetry(mask, rotations = 4):
-    '''Return mean asymmetry score from mask.
-    Chose 4 instead of the defaulted 30 so that the machine runs faster. 
 
-    Args:
-        mask (numpy.ndarray): mask to compute asymmetry score for
-        rotations (int, optional): amount of rotations (default 4)
+def mean_asymmetry(mask, rotations = 4):
+    """
+    Compute mean asymmetry over multiple rotations.
+
+    A small number of rotations (default = 4) is used for efficiency.
+
+    Parameters:
+        mask (ndarray): binary mask
+        rotations (int): number of rotations
 
     Returns:
-        mean_score (float): mean asymmetry score.
-    '''
+        float: mean asymmetry score
+    """
+    
     asymmetry_scores = rotation_asymmetry(mask, rotations)
-    mean_score = sum(asymmetry_scores.values()) / len(asymmetry_scores)
 
-    return mean_score
+    return sum(asymmetry_scores.values()) / len(asymmetry_scores)
