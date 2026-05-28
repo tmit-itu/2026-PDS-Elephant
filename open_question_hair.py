@@ -24,8 +24,8 @@ from sklearn.metrics import (
 
 # Load data
 features = pd.read_csv("data/features_extended.csv")
-pred_base = pd.read_csv("results/predictions_baseline.csv")
-pred_ext = pd.read_csv("results/predictions_extended.csv")
+pred_base = pd.read_csv("results/predictions/predictions_baseline.csv")
+pred_ext = pd.read_csv("results/predictions/predictions_extended.csv")
 
 # Merge hair coverage with predictions
 hair = features[["img_id", "patient_id", "hair_coverage"]]
@@ -98,6 +98,7 @@ pivot.plot(kind="bar")
 plt.ylabel("AUC")
 plt.title("Model Performance by Hair Coverage")
 plt.xticks(rotation=0)
+plt.ylim(0, 0.8)
 plt.legend(title="Model")
 
 plt.tight_layout()
