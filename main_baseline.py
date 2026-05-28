@@ -11,7 +11,7 @@ from sklearn.metrics import (
     precision_score,
     f1_score,
     confusion_matrix,
-    ConfusionMatrixDisplay
+    ConfusionMatrixDisplay,
 )
 import matplotlib.pyplot as plt
 
@@ -65,6 +65,10 @@ results = pd.DataFrame({
 
 results.to_csv("results/baseline_metrics_summary.csv", index=False)
 
+# -------------------------
+# Confusion Matrix Plot
+# -------------------------
+
 cm = confusion_matrix(y_true, y_pred)
 
 display_matrix = ConfusionMatrixDisplay(
@@ -94,4 +98,30 @@ plt.show()
 print(
     "Confusion matrix saved to "
     "results/baseline_confusion_matrix.png"
+)
+# -------------------------
+# Cross Validation Plot
+# -------------------------
+
+plt.figure(figsize=(8, 5))
+plt.plot(
+    cv_results["max_depth"],
+    cv_results["mean_auc"],
+    marker="o"
+)
+plt.xlabel("Tree Depth")
+plt.ylabel("Mean AUC")
+plt.title("Baseline Cross-Validation Performance")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(
+    "results/cross_validation_baseline.png",
+    dpi=300
+)
+plt.show()
+plt.close()
+
+print(
+    "Cross-validation plot saved to "
+    "results/cross_validation_baseline.png"
 )

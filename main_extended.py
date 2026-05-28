@@ -140,7 +140,34 @@ plt.savefig(
     dpi=300
 )
 plt.show()
+plt.close
 print(
     "Confusion matrix saved to "
     "results/extended_confusion_matrix.png"
+)
+# -------------------------
+# Cross Validation Plot
+# -------------------------
+
+plt.figure(figsize=(8, 5))
+plt.plot(
+    cv_results["max_depth"],
+    cv_results["mean_auc"],
+    marker="o"
+)
+plt.xlabel("Tree Depth")
+plt.ylabel("Mean AUC")
+plt.title("Extended Cross-Validation Performance")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(
+    "results/cross_validation_extended.png",
+    dpi=300
+)
+plt.show()
+plt.close()
+
+print(
+    "Cross-validation plot saved to "
+    "results/cross_validation_extended.png"
 )
