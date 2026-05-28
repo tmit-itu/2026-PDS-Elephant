@@ -16,11 +16,39 @@ import numpy as np
 
 
 def get_features(data):
+    """
+    Select feature columns from the dataset.
+
+    Excludes identifiers and target variable, keeping only numerical features.
+
+    Parameters:
+        data (DataFrame): dataset with features and labels
+
+    Returns:
+        list: names of feature columns
+    """
+
     ignore_columns = ["img_id", "patient_id", "cancer"]
     return [col for col in data.columns if col not in ignore_columns]
 
 
 def split_by_patient(data, features, test_size=0.2):
+    """
+    Split data into train and test sets based on patient IDs.
+
+    Ensures that images from the same patient do not appear in both
+    training and testing sets, preventing data leakage.
+
+    Parameters:
+        data (DataFrame): full dataset
+        features (list): feature column names
+        test_size (float): proportion of patients used for testing
+
+    Returns:
+        data, X, y, train_idx, test_idx
+    """
+
+    # Prepare data and labels
     data = data.dropna().copy()
     data["cancer"] = data["cancer"].astype(int)
 
@@ -28,14 +56,15 @@ def split_by_patient(data, features, test_size=0.2):
     y = data["cancer"]
     patients = data["patient_id"]
 
+    # Split unique patients into train/test
     unique_patients = patients.unique()
-
     train_patients, test_patients = train_test_split(
         unique_patients,
         test_size=test_size,
         random_state=42
     )
 
+    # Create boolean indices for splitting
     train_idx = patients.isin(train_patients)
     test_idx = patients.isin(test_patients)
 
@@ -44,8 +73,19 @@ def split_by_patient(data, features, test_size=0.2):
 
 def cross_validate_tree_depth(data, features, max_depth=10):
     """
-    Test different Decision Tree depths using GroupKFold cross-validation.
-    The split is grouped by patient_id to avoid data leakage.
+    Select optimal Decision Tree depth using GroupKFold cross-validation.
+
+    The evaluation is performed on the training set with patient-level
+    grouping to avoid data leakage.
+
+    Parameters:
+        data (DataFrame): dataset
+        features (list): feature column names
+        max_depth (int): maximum tree depth to test
+
+    Returns:
+        best_depth (int): selected tree depth
+        results_df (DataFrame): cross-validation results
     """
 
     data, X, y, train_idx, _ = split_by_patient(data, features)
@@ -55,14 +95,11 @@ def cross_validate_tree_depth(data, features, max_depth=10):
     groups_train = data.loc[train_idx, "patient_id"]
 
     cv = GroupKFold(n_splits=5)
-
     results = []
 
+    # Evaluate tree depth from 1 to max_depth
     for depth in range(1, max_depth + 1):
-        model = DecisionTreeClassifier(
-            max_depth=depth,
-            random_state=42
-        )
+        model = DecisionTreeClassifier(max_depth=depth, random_state=42)
 
         auc_scores = cross_val_score(
             model,
@@ -81,6 +118,7 @@ def cross_validate_tree_depth(data, features, max_depth=10):
 
     results_df = pd.DataFrame(results)
 
+    # Select depth with highest mean AUC
     best_row = results_df.loc[results_df["mean_auc"].idxmax()]
     best_depth = int(best_row["max_depth"])
 
@@ -94,13 +132,30 @@ def cross_validate_tree_depth(data, features, max_depth=10):
 
 
 def train_model(data, features, max_depth=4, model_path=None):
+    """
+    Train a Decision Tree classifier using the training dataset.
+
+    Optionally saves the trained model to disk.
+
+    Parameters:
+        data (DataFrame): dataset
+        features (list): feature column names
+        max_depth (int): tree depth
+        model_path (str, optional): path to save model
+
+    Returns:
+        trained model
+    """
+
     data, X, y, train_idx, _ = split_by_patient(data, features)
     X_train = X[train_idx]
     y_train = y[train_idx]
 
+    # Train model
     model = DecisionTreeClassifier(max_depth=max_depth, random_state=42)
     model.fit(X_train, y_train)
 
+# Save model if path provided
     if model_path is not None:
         Path(model_path).parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(model, model_path)
@@ -110,6 +165,23 @@ def train_model(data, features, max_depth=4, model_path=None):
 
 
 def evaluate_model(data, features, model, result_dir, output_name):
+    """
+    Evaluate trained model on the test set and save predictions.
+
+    Computes standard evaluation metrics and stores predictions
+    for further analysis.
+
+    Parameters:
+        data (DataFrame): dataset
+        features (list): feature column names
+        model: trained classifier
+        result_dir (str): directory to save outputs
+        output_name (str): name of prediction CSV
+
+    Returns:
+        dict: evaluation metrics
+    """
+
     result_dir = Path(result_dir)
     result_dir.mkdir(parents=True, exist_ok=True)
 
@@ -118,9 +190,11 @@ def evaluate_model(data, features, model, result_dir, output_name):
     X_test = X[test_idx]
     y_test = y[test_idx]
 
+    # Generate predictions and probabilities
     y_pred = model.predict(X_test)
     y_prob = model.predict_proba(X_test)[:, 1]
 
+    # Compute metrics
     acc = accuracy_score(y_test, y_pred)
     rec = recall_score(y_test, y_pred)
     prec = precision_score(y_test, y_pred)
@@ -137,6 +211,7 @@ def evaluate_model(data, features, model, result_dir, output_name):
     print("\nConfusion matrix:")
     print(confusion_matrix(y_test, y_pred))
 
+    # Save predictions to CSV
     results = pd.DataFrame({
         "img_id": data.loc[test_idx, "img_id"].values,
         "patient_id": data.loc[test_idx, "patient_id"].values,

@@ -15,13 +15,23 @@ from src.classifier import (
     evaluate_model
 )
 
-# Load data
-data = pd.read_csv("data/features_extended.csv")
+"""
+Run the extended classification pipeline.
 
-# Get feature columns
+This script:
+- Loads extended feature data
+- Selects optimal tree depth via cross-validation
+- Trains a Decision Tree model
+- Evaluates performance and saves predictions
+- Generates summary metrics and visualization plots
+"""
+
+
+# Load data and select feature columns
+data = pd.read_csv("data/features_extended.csv")
 features = get_features(data)
 
-# Find best tree depth
+# Cross-validation to find best tree depth
 best_depth, cv_results = cross_validate_tree_depth(
     data=data,
     features=features,
@@ -34,7 +44,7 @@ cv_results.to_csv(
     index=False
 )
 
-# Train model
+# Train model and save it
 model = train_model(
     data=data,
     features=features,
@@ -42,7 +52,7 @@ model = train_model(
     model_path="results/models/tree_extended.pkl"
 )
 
-# Generate predictions CSV
+# Generate predictions CSV on test set
 evaluate_model(
     data=data,
     features=features,
@@ -61,17 +71,13 @@ df = pd.read_csv("results/predictions/predictions_extended.csv")
 y_true = df["true_label"]
 y_pred = df["predicted_label"]
 
-# Metrics
 accuracy = accuracy_score(y_true, y_pred)
 recall = recall_score(y_true, y_pred)
 precision = precision_score(y_true, y_pred)
 f1 = f1_score(y_true, y_pred)
 
-# Confusion matrix
-tn, fp, fn, tp = confusion_matrix(
-    y_true,
-    y_pred
-).ravel()
+# Confusion matrix components (TN, FP, FN, TP)
+tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
 
 print("\nExtended Results:=")
 print("Accuracy:", accuracy)
@@ -80,7 +86,7 @@ print("Precision:", precision)
 print("F1 Score", f1)
 print("TP:", tp, "FP:", fp, "TN:", tn, "FN:", fn)
 
-# Save summary
+# Save summary as CSV
 summary = pd.DataFrame({
     "Metric": [
         "Accuracy",
@@ -111,10 +117,8 @@ summary.to_csv(
 
 print("Summary saved to results/extended_metrics_summary.csv")
 
-# -------------------------
-# Confusion Matrix Plot
-# -------------------------
 
+# Confusion matrix visualization
 cm = confusion_matrix(y_true, y_pred)
 
 display_matrix = ConfusionMatrixDisplay(
@@ -135,7 +139,7 @@ display_matrix.plot(
 
 plt.title("Extended Model Confusion Matrix")
 plt.tight_layout()
-# Save image
+
 plt.savefig(
     "results/figures/extended_confusion_matrix.png",
     dpi=300
@@ -162,6 +166,7 @@ plt.ylabel("Mean AUC (±1 std)")
 plt.title("Extended Cross-Validation Performance")
 plt.grid(True)
 plt.tight_layout()
+
 plt.savefig(
     "results/figures/cross_validation_extended.png",
     dpi=300

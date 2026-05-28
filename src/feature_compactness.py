@@ -4,33 +4,35 @@ from skimage import measure
 
 def get_compactness(mask):
     """
-    Calculates the compactness of a lesion based on its binary mask.
-    A perfect circle will have a compactness close to 1. 
-    Highly irregular or branching shapes will have higher values.
-    
-    :param mask: A 2D numpy array representing the mask.
-    :return: A float representing the compactness.
+    Compute the compactness of a lesion from its binary mask.
+
+    Compactness measures how closely the shape resembles a circle.
+    A value close to 1 indicates a circular shape, while higher values
+    indicate more irregular or complex boundaries.
+
+    Parameters:
+        mask (ndarray): binary mask of the lesion region
+
+    Returns:
+        float: compactness value
     """
-    # 1. Ensure the mask is binary (True/False). 
-    # This protects against masks loaded as 0-255 instead of 0-1.
+
+    # Ensure mask is binary and single-channel
     if len(mask.shape) == 3:
         mask = mask[:, :, 0]
     binary_mask = mask > 0
     
-    # 2. Calculate Area (count of all pixels in the lesion)
+    # Compute lesion area
     area = np.sum(binary_mask)
-    
-    # Handle the edge case where the mask is completely empty to avoid division by zero
     if area == 0:
         return 0.0 
     
-    # 3. Calculate Perimeter using skimage's built-in perimeter function
+    # Compute perimeter of the lesion
     perimeter = measure.perimeter(binary_mask)
-
     if perimeter == 0:
         return 0.0
     
-    # 4. Apply the formula
+    # Apply compactness formula
     compactness = (perimeter ** 2) / (4 * np.pi * area)
     
     return float(compactness)
