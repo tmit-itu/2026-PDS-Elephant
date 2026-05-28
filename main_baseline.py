@@ -35,11 +35,11 @@ evaluate_model(
     data=data,
     features=features,
     model=model,
-    result_dir="results",
+    result_dir="results/predictions/",
     output_name="predictions_baseline.csv"
 )
 
-df = pd.read_csv("results/predictions_baseline.csv")
+df = pd.read_csv("results/predictions/predictions_baseline.csv")
 
 y_true = df["true_label"]
 y_pred = df["predicted_label"]
@@ -74,8 +74,8 @@ cm = confusion_matrix(y_true, y_pred)
 display_matrix = ConfusionMatrixDisplay(
     confusion_matrix=cm,
     display_labels=[
-        "Benign",
-        "Skin Cancer"
+        "Non-cancer",
+        "Cancer"
     ]
 )
 
@@ -91,31 +91,32 @@ plt.title("Baseline Model Confusion Matrix")
 plt.tight_layout()
 # Save image
 plt.savefig(
-    "results/baseline_confusion_matrix.png",
+    "results/figures/baseline_confusion_matrix.png",
     dpi=300
 )
 plt.show()
 print(
     "Confusion matrix saved to "
-    "results/baseline_confusion_matrix.png"
+    "results/figures/baseline_confusion_matrix.png"
 )
-# -------------------------
-# Cross Validation Plot
-# -------------------------
 
+
+# Cross Validation Plot
 plt.figure(figsize=(8, 5))
-plt.plot(
+plt.errorbar(
     cv_results["max_depth"],
     cv_results["mean_auc"],
-    marker="o"
+    yerr = cv_results["std_auc"], 
+    fmt="o-",                     
+    capsize=5                    
 )
 plt.xlabel("Tree Depth")
-plt.ylabel("Mean AUC")
+plt.ylabel("Mean AUC (±1 std)")
 plt.title("Baseline Cross-Validation Performance")
 plt.grid(True)
 plt.tight_layout()
 plt.savefig(
-    "results/cross_validation_baseline.png",
+    "results/figures/cross_validation_baseline.png",
     dpi=300
 )
 plt.show()
@@ -123,5 +124,5 @@ plt.close()
 
 print(
     "Cross-validation plot saved to "
-    "results/cross_validation_baseline.png"
+    "results/figures/cross_validation_baseline.png"
 )
