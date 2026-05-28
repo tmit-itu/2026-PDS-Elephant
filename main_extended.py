@@ -4,9 +4,10 @@ from sklearn.metrics import (
     recall_score,
     precision_score,
     f1_score,
-    confusion_matrix
+    confusion_matrix,
+    ConfusionMatrixDisplay
 )
-
+import matplotlib.pyplot as plt
 from src.classifier import (
     get_features,
     cross_validate_tree_depth,
@@ -34,9 +35,11 @@ cv_results.to_csv(
 )
 
 # Train model
-model = train_model(data, features, max_depth=best_depth,
-                    model_path="results/models/tree_extended.pkl")
-
+model = train_model(
+    data=data,
+    features=features,
+    max_depth=best_depth
+)
 
 # Generate predictions CSV
 evaluate_model(
@@ -69,6 +72,13 @@ tn, fp, fn, tp = confusion_matrix(
     y_pred
 ).ravel()
 
+print("\nExtended Results:=")
+print("Accuracy:", accuracy)
+print("Recall:", recall)
+print("Precision:", precision)
+print("F1 Score", f1)
+print("TP:", tp, "FP:", fp, "TN:", tn, "FN:", fn)
+
 # Save summary
 summary = pd.DataFrame({
     "Metric": [
@@ -99,3 +109,65 @@ summary.to_csv(
 )
 
 print("Summary saved to results/extended_metrics_summary.csv")
+
+# -------------------------
+# Confusion Matrix Plot
+# -------------------------
+
+cm = confusion_matrix(y_true, y_pred)
+
+display_matrix = ConfusionMatrixDisplay(
+    confusion_matrix=cm,
+    display_labels=[
+        "Benign",
+        "Skin Cancer"
+    ]
+)
+
+fig, ax = plt.subplots(figsize=(6, 6))
+
+display_matrix.plot(
+    cmap="Reds",
+    ax=ax,
+    colorbar=True
+)
+
+plt.title("Extended Model Confusion Matrix")
+plt.tight_layout()
+# Save image
+plt.savefig(
+    "results/extended_confusion_matrix.png",
+    dpi=300
+)
+plt.show()
+plt.close
+print(
+    "Confusion matrix saved to "
+    "results/extended_confusion_matrix.png"
+)
+# -------------------------
+# Cross Validation Plot
+# -------------------------
+
+plt.figure(figsize=(8, 5))
+plt.plot(
+    cv_results["max_depth"],
+    cv_results["mean_auc"],
+    marker="o"
+)
+plt.xlabel("Tree Depth")
+plt.ylabel("Mean AUC")
+plt.title("Extended Cross-Validation Performance")
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(
+    "results/cross_validation_extended.png",
+    dpi=300
+)
+plt.show()
+plt.close()
+
+print(
+    "Cross-validation plot saved to "
+    "results/cross_validation_extended.png"
+)
