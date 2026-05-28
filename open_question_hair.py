@@ -12,6 +12,7 @@ balanced group sizes, allowing a fair comparison across subgroups.
 """
 
 import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import (
     accuracy_score,
@@ -87,3 +88,18 @@ summary = summary[["group", "model", "n", "accuracy", "recall", "precision", "f1
 
 # Save results
 summary.to_csv("results/open_question_hair.csv", index=False)
+
+
+# create AUC graph 
+pivot = summary.pivot(index="group", columns="model", values="auc")
+
+pivot.plot(kind="bar")
+
+plt.ylabel("AUC")
+plt.title("Model Performance by Hair Coverage")
+plt.xticks(rotation=0)
+plt.legend(title="Model")
+
+plt.tight_layout()
+plt.savefig("results/figures/open_question_hair_plot.png", dpi=300)
+plt.show()
