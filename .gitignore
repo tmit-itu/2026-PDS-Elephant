@@ -10,6 +10,7 @@ data/masks/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*.pyc 
 *.py[codz]
 *$py.class
 

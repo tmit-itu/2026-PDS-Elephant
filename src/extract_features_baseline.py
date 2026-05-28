@@ -12,7 +12,7 @@ from preprocessing import enhance_color_hsv_clahe
 
 imgs_path = "../data/imgs"
 masks_path = "../data/masks"
-output_path = "../results/features_baseline.csv"
+output_path = "../data/features_baseline.csv"
 
 def process_image(row):
     try:
@@ -86,6 +86,8 @@ def extract_all():
      
         
     df_features = pd.DataFrame(results)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True) 
+
     df_features.to_csv(output_path, index=False)
     print("Feature extraction completed successfully. CSV file saved.")
     print(f"CSV file saved at: {output_path}")
