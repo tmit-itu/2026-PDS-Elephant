@@ -39,12 +39,12 @@ evaluate_model(
     data=data,
     features=features,
     model=model,
-    result_dir="results",
+    result_dir="results/predictions/",
     output_name=f"predictions_{mode}_loaded.csv",
 )
 
-# Optional: print a quick metrics summary
-df = pd.read_csv(f"results/predictions_{mode}_loaded.csv")
+#print a quick metrics summary
+df = pd.read_csv(f"results/predictions/predictions_{mode}_loaded.csv")
 y_true = df["true_label"]
 y_pred = df["predicted_label"]
 
