@@ -25,7 +25,7 @@ The dataset images and masks are **not** included in this repository as instruct
 masks in `data/masks/`.
 
 ## Repository structure
-
+```
 .
 ├── data/
 │   ├── imgs/                       # lesion images (not included)
@@ -55,7 +55,7 @@ masks in `data/masks/`.
 ├── open_question_hair.py       # open question: how much does hair affect results
 ├── requirements.txt
 └── README.md
-
+```
 ## Setup
 
 Requires Python 3. Install dependencies:
