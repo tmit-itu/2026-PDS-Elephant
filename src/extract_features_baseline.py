@@ -83,7 +83,7 @@ def extract_all():
     """
 
     # Load metadata and map diagnosis to binary labels
-    metadata = pd.read_csv("../metadata.csv")
+    metadata = pd.read_csv("../data/metadata.csv")
     diagnosis_mapping = {'MEL': 1, 'BCC': 1, 'SCC': 1, 'NEV': 0, 'ACK': 0, 'SEK': 0}
     metadata["cancer"] = metadata["diagnostic"].map(diagnosis_mapping)
     
